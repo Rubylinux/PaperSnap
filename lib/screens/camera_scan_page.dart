@@ -7,6 +7,7 @@ import 'package:papersnap/screens/save_document_page.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'package:scan/scan.dart';
 
 class CameraScanPage extends StatefulWidget {
   const CameraScanPage({super.key});
@@ -21,7 +22,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
   bool _isInitialized = false;
   bool _isCapturing = false;
   FlashMode _currentFlashMode = FlashMode.off;
-  ScanSession _scanSession = ScanSession(
+  final ScanSession _scanSession = ScanSession(
     scannedImages: [],
     sessionId: DateTime.now(),
   );
@@ -36,7 +37,6 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
     _startDocumentDetection();
   }
@@ -44,7 +44,6 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _stabilityTimer?.cancel();
     _controller?.dispose();
     super.dispose();
   }
@@ -114,45 +113,60 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
   }
 
   void _startDocumentDetection() {
-    Timer.periodic(const Duration(milliseconds: 200), (timer) {
+    _controller?.startImageStream((CameraImage image) async {
       if (!mounted || _controller == null || !_controller!.value.isInitialized) {
-        timer.cancel();
         return;
       }
-      _detectDocument();
+      // Process the image for edge detection here
+      // Note: Processing every frame might be too resource-intensive.
+      // Consider using a timer or frame skipping for better performance.
+      // You'll need to convert the CameraImage to a format suitable for the scan package.
+      // This part is complex and depends on the scan package's API and image formats.
+      // For now, we'll keep the simulated logic as a placeholder.
+      _detectDocument(image);
     });
   }
 
-  void _detectDocument() {
-    // Simulate document detection - replace with actual edge detection in production
+  void _detectDocument(CameraImage image) {
+    // Convert CameraImage to a format suitable for the scan package (e.g., bytes)
+    // This part is complex and depends on the CameraImage format and the scan package's requirements.
+    // For now, we'll assume you have a way to get image bytes from CameraImage.
+    // You might need to use the 'image' package for this conversion.
+
+    // Placeholder for image bytes
+    // final imageBytes = _convertCameraImageToBytes(image);
+
+    // Using a placeholder for detected polygon from scan package
+    // Replace with actual call to scan package's detection method
+    // final detectedPolygon = ScanbotSdk.detectDocument(imageBytes);
+
+    // Simulate document detection for now
     final random = Random();
     final screenSize = MediaQuery.of(context).size;
-    
+
     // Simulate finding document corners with some randomness
     if (random.nextDouble() > 0.3) { // 70% chance of detecting a document
       final centerX = screenSize.width / 2;
       final centerY = screenSize.height / 2;
       final width = screenSize.width * (0.6 + random.nextDouble() * 0.2);
       final height = screenSize.height * (0.4 + random.nextDouble() * 0.2);
-      
+
       final corners = [
         Offset(centerX - width/2, centerY - height/2), // top-left
         Offset(centerX + width/2, centerY - height/2), // top-right
         Offset(centerX + width/2, centerY + height/2), // bottom-right
         Offset(centerX - width/2, centerY + height/2), // bottom-left
       ];
-      
-      _updateDocumentCorners(corners);
+
+      _updateDocumentCorners(corners); // Update with simulated corners
     } else {
       _updateDocumentCorners(null);
     }
   }
-
   void _updateDocumentCorners(List<Offset>? corners) {
     if (corners != null) {
       final now = DateTime.now();
       final timeSinceLastDetection = now.difference(_lastDetectionTime).inMilliseconds;
-      
       if (timeSinceLastDetection < 500) { // Document stable for detection
         if (!_isDocumentStable) {
           _startStabilityTimer();
@@ -160,12 +174,10 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
       } else {
         _resetStability();
       }
-      
       _lastDetectionTime = now;
     } else {
       _resetStability();
     }
-    
     setState(() {
       _detectedCorners = corners;
     });
@@ -207,14 +219,22 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
     _resetStability();
 
     try {
+      // Capture the image
       final image = await _controller!.takePicture();
-      _scanSession.addImage(image.path);
-      
+
+      // Crop the image using the detected corners
+      // You'll need to convert the detected corners (Offsets) to a format suitable for the scan package's cropping method.
+      // This part depends on the scan package's API.
+      // For now, we'll skip the cropping and use the original image path.
+      // Replace this with the actual cropping logic using the scan package.
+      final croppedImagePath = image.path; // Placeholder for cropped image path
+
+      _scanSession.addImage(croppedImagePath);
+
       if (mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => DocumentPreviewPage(
-              imagePath: image.path,
+            builder: (context) => DocumentPreviewPage( // Assuming DocumentPreviewPage handles image path
               onRetake: () => Navigator.of(context).pop(),
               onKeep: () => Navigator.of(context).pop(),
             ),
