@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:papersnap/models/document.dart';
-import 'package:papersnap/models/scan_session.dart';
 import 'package:papersnap/screens/document_preview_page.dart';
 import 'package:papersnap/screens/save_document_page.dart';
 import 'dart:io';
