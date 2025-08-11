@@ -22,10 +22,22 @@ subprojects {
         if (project.hasProperty("kotlin")) {
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
                 kotlinOptions {
-                    // Set JVM target to 11 for all subprojects by default
-                    jvmTarget = "11"
+ jvmTarget = "17"
+                }
+            }
+        }
+        if (project.name == 'camera_android_camerax') {
+            project.android {
+                compileOptions.sourceCompatibility = JavaVersion.VERSION_17
+                compileOptions.targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+    }
 
-                    // Override JVM target for camera_android_camerax to match its Java compilation target
+    afterEvaluate { project ->
+        if (project.hasProperty("kotlin")) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+                kotlinOptions {
                     if (project.name == 'camera_android_camerax') {
                         jvmTarget = "11"
                     }
