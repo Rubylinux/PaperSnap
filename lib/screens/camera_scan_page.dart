@@ -234,7 +234,8 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
       if (mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => DocumentPreviewPage( // Assuming DocumentPreviewPage handles image path
+            builder: (context) => DocumentPreviewPage(
+              imagePath: croppedImagePath,
               onRetake: () => Navigator.of(context).pop(),
               onKeep: () => Navigator.of(context).pop(),
             ),
@@ -323,7 +324,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.6),
+              color: Colors.black.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -395,7 +396,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
               height: 48,
               decoration: BoxDecoration(
                 color: _currentFlashMode == FlashMode.torch 
-                    ? Colors.yellow.withValues(alpha: 0.3)
+                    ? Colors.yellow.withOpacity(0.3)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(24),
                 border: _currentFlashMode == FlashMode.torch 
@@ -442,7 +443,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
           border: Border.all(color: Colors.white, width: 2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withOpacity(0.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -498,7 +499,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
     
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.black.withValues(alpha: 0.9),
+      backgroundColor: Colors.black.withOpacity(0.9),
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(20),
@@ -551,7 +552,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.2),
+                            color: Colors.red.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(color: Colors.red, width: 1),
                           ),
@@ -581,7 +582,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.2),
+                            color: Colors.green.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(color: Colors.green, width: 1),
                           ),
@@ -613,7 +614,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.2),
+                              color: Colors.blue.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(30),
                               border: Border.all(color: Colors.blue, width: 1),
                             ),
@@ -694,13 +695,13 @@ class DocumentDetectionPainter extends CustomPainter {
 
     // Paint for detected document edges
     final borderPaint = Paint()
-      ..color = const Color(0xFF64B5F6).withValues(alpha: 0.8) // Light blue
+      ..color = const Color(0xFF64B5F6).withOpacity(0.8) // Light blue
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
     // Paint for fill overlay
     final fillPaint = Paint()
-      ..color = const Color(0xFF64B5F6).withValues(alpha: 0.2) // Light blue opaque
+      ..color = const Color(0xFF64B5F6).withOpacity(0.2) // Light blue opaque
       ..style = PaintingStyle.fill;
 
     // Create path for document outline
@@ -738,7 +739,7 @@ class DocumentDetectionPainter extends CustomPainter {
 
     // Background circle
     final backgroundPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.5)
+      ..color = Colors.black.withOpacity(0.5)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius, backgroundPaint);
 
