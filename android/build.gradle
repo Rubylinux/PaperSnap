@@ -22,10 +22,12 @@ subprojects {
         if (project.hasProperty("kotlin")) {
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
                 kotlinOptions {
- jvmTarget = "17"
+                    // Default JVM target for Kotlin
+                    jvmTarget = "17"
                 }
             }
         }
+        // Explicitly set JVM target for camera_android_camerax to match its Java compilation target (11)
         if (project.name == 'camera_android_camerax') {
             project.android {
                 compileOptions.sourceCompatibility = JavaVersion.VERSION_17
