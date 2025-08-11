@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:papersnap/models/document.dart';
+import 'package:papersnap/models/scan_session.dart';
 import 'package:papersnap/screens/document_preview_page.dart';
 import 'package:papersnap/screens/save_document_page.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
-import 'package:scan/scan.dart';
 
 class CameraScanPage extends StatefulWidget {
   const CameraScanPage({super.key});
@@ -38,7 +38,6 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
   void initState() {
     super.initState();
     _initializeCamera();
-    _startDocumentDetection();
   }
 
   @override
@@ -112,122 +111,16 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
     );
   }
 
-  void _startDocumentDetection() {
-    _controller?.startImageStream((CameraImage image) async {
-      if (!mounted || _controller == null || !_controller!.value.isInitialized) {
-        return;
-      }
-      // Process the image for edge detection here
-      // Note: Processing every frame might be too resource-intensive.
-      // Consider using a timer or frame skipping for better performance.
-      // You'll need to convert the CameraImage to a format suitable for the scan package.
-      // This part is complex and depends on the scan package's API and image formats.
-      // For now, we'll keep the simulated logic as a placeholder.
-      _detectDocument(image);
-    });
-  }
-
-  void _detectDocument(CameraImage image) {
-    // Convert CameraImage to a format suitable for the scan package (e.g., bytes)
-    // This part is complex and depends on the CameraImage format and the scan package's requirements.
-    // For now, we'll assume you have a way to get image bytes from CameraImage.
-    // You might need to use the 'image' package for this conversion.
-
-    // Placeholder for image bytes
-    // final imageBytes = _convertCameraImageToBytes(image);
-
-    // Using a placeholder for detected polygon from scan package
-    // Replace with actual call to scan package's detection method
-    // final detectedPolygon = ScanbotSdk.detectDocument(imageBytes);
-
-    // Simulate document detection for now
-    final random = Random();
-    final screenSize = MediaQuery.of(context).size;
-
-    // Simulate finding document corners with some randomness
-    if (random.nextDouble() > 0.3) { // 70% chance of detecting a document
-      final centerX = screenSize.width / 2;
-      final centerY = screenSize.height / 2;
-      final width = screenSize.width * (0.6 + random.nextDouble() * 0.2);
-      final height = screenSize.height * (0.4 + random.nextDouble() * 0.2);
-
-      final corners = [
-        Offset(centerX - width/2, centerY - height/2), // top-left
-        Offset(centerX + width/2, centerY - height/2), // top-right
-        Offset(centerX + width/2, centerY + height/2), // bottom-right
-        Offset(centerX - width/2, centerY + height/2), // bottom-left
-      ];
-
-      _updateDocumentCorners(corners); // Update with simulated corners
-    } else {
-      _updateDocumentCorners(null);
-    }
-  }
-  void _updateDocumentCorners(List<Offset>? corners) {
-    if (corners != null) {
-      final now = DateTime.now();
-      final timeSinceLastDetection = now.difference(_lastDetectionTime).inMilliseconds;
-      if (timeSinceLastDetection < 500) { // Document stable for detection
-        if (!_isDocumentStable) {
-          _startStabilityTimer();
-        }
-      } else {
-        _resetStability();
-      }
-      _lastDetectionTime = now;
-    } else {
-      _resetStability();
-    }
-    setState(() {
-      _detectedCorners = corners;
-    });
-  }
-
-  void _startStabilityTimer() {
-    _stabilityTimer?.cancel();
-    _isDocumentStable = true;
-    _stabilityProgress = 0.0;
-    
-    _stabilityTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      setState(() {
-        _stabilityProgress += 0.025; // 2 seconds to complete
-      });
-      
-      if (_stabilityProgress >= 1.0) {
-        timer.cancel();
-        _autoCapture();
-      }
-    });
-  }
-
-  void _resetStability() {
-    _stabilityTimer?.cancel();
-    _isDocumentStable = false;
-    _stabilityProgress = 0.0;
-  }
-
-  void _autoCapture() {
-    if (_detectedCorners != null) {
-      _captureImage(auto: true);
-    }
-  }
-
   Future<void> _captureImage({bool auto = false}) async {
     if (_controller == null || !_controller!.value.isInitialized || _isCapturing) return;
 
     setState(() => _isCapturing = true);
-    _resetStability();
 
     try {
       // Capture the image
       final image = await _controller!.takePicture();
 
-      // Crop the image using the detected corners
-      // You'll need to convert the detected corners (Offsets) to a format suitable for the scan package's cropping method.
-      // This part depends on the scan package's API.
-      // For now, we'll skip the cropping and use the original image path.
-      // Replace this with the actual cropping logic using the scan package.
-      final croppedImagePath = image.path; // Placeholder for cropped image path
+      final croppedImagePath = image.path; 
 
       _scanSession.addImage(croppedImagePath);
 
@@ -281,16 +174,6 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
         // Camera preview
         Positioned.fill(
           child: CameraPreview(_controller!),
-        ),
-        
-        // Document detection overlay
-        Positioned.fill(
-          child: CustomPaint(
-            painter: DocumentDetectionPainter(
-              corners: _detectedCorners,
-              stabilityProgress: _stabilityProgress,
-            ),
-          ),
         ),
         
         // Top controls
@@ -443,7 +326,7 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
           border: Border.all(color: Colors.white, width: 2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withOpacity(.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -677,101 +560,5 @@ class _CameraScanPageState extends State<CameraScanPage> with WidgetsBindingObse
           ? FlashMode.off 
           : FlashMode.torch;
     }
-  }
-}
-
-class DocumentDetectionPainter extends CustomPainter {
-  final List<Offset>? corners;
-  final double stabilityProgress;
-
-  DocumentDetectionPainter({
-    this.corners,
-    this.stabilityProgress = 0.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (corners == null || corners!.length != 4) return;
-
-    // Paint for detected document edges
-    final borderPaint = Paint()
-      ..color = const Color(0xFF64B5F6).withOpacity(0.8) // Light blue
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    // Paint for fill overlay
-    final fillPaint = Paint()
-      ..color = const Color(0xFF64B5F6).withOpacity(0.2) // Light blue opaque
-      ..style = PaintingStyle.fill;
-
-    // Create path for document outline
-    final path = Path();
-    path.moveTo(corners![0].dx, corners![0].dy);
-    for (int i = 1; i < corners!.length; i++) {
-      path.lineTo(corners![i].dx, corners![i].dy);
-    }
-    path.close();
-
-    // Draw fill
-    canvas.drawPath(path, fillPaint);
-    
-    // Draw border
-    canvas.drawPath(path, borderPaint);
-
-    // Draw corner indicators
-    final cornerPaint = Paint()
-      ..color = const Color(0xFF64B5F6)
-      ..style = PaintingStyle.fill;
-
-    for (final corner in corners!) {
-      canvas.drawCircle(corner, 6, cornerPaint);
-    }
-
-    // Draw stability progress indicator if document is being stabilized
-    if (stabilityProgress > 0) {
-      _drawStabilityIndicator(canvas, size);
-    }
-  }
-
-  void _drawStabilityIndicator(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height * 0.85);
-    const radius = 30.0;
-
-    // Background circle
-    final backgroundPaint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, backgroundPaint);
-
-    // Progress arc
-    final progressPaint = Paint()
-      ..color = const Color(0xFF64B5F6)
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    const startAngle = -pi / 2; // Start from top
-    final sweepAngle = 2 * pi * stabilityProgress;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - 2),
-      startAngle,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-
-    // Center dot
-    final centerPaint = Paint()
-      ..color = const Color(0xFF64B5F6)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, 4, centerPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return oldDelegate is! DocumentDetectionPainter ||
-           oldDelegate.corners != corners ||
-           oldDelegate.stabilityProgress != stabilityProgress;
   }
 }

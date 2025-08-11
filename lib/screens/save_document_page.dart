@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:papersnap/models/document.dart';
+import 'package:papersnap/models/scan_session.dart';
 import 'package:papersnap/services/document_storage.dart';
 import 'dart:io';
 
@@ -147,7 +148,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
+                        color: Colors.black.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -165,7 +166,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
           : Icon(
               Icons.document_scanner_outlined,
               size: 64,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
             ),
     );
   }
@@ -190,7 +191,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
           decoration: InputDecoration(
             hintText: 'Enter document name',
             hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
             ),
             filled: true,
             fillColor: theme.colorScheme.surfaceContainer,
@@ -262,11 +263,11 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
+                : theme.colorScheme.outline.withOpacity(0.2),
             width: isSelected ? 2 : 1,
           ),
           color: isSelected
-              ? theme.colorScheme.primary.withValues(alpha: 0.05)
+              ? theme.colorScheme.primary.withOpacity(0.05)
               : theme.colorScheme.surfaceContainer,
         ),
         child: Column(
@@ -289,7 +290,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
               subtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
