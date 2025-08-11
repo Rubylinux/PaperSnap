@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:papersnap/models/document.dart';
-import 'package:papersnap/models/scan_session.dart';
 import 'package:papersnap/services/document_storage.dart';
 import 'dart:io';
 
@@ -25,7 +24,8 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = 'Scanned Document ${DateTime.now().day}-${DateTime.now().month}';
+    _nameController.text =
+        'Scanned Document ${DateTime.now().day}-${DateTime.now().month}';
   }
 
   @override
@@ -47,14 +47,17 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
     try {
       final fileName = _nameController.text.trim();
       String filePath;
-      
+
       if (_selectedType == DocumentType.pdf) {
-        filePath = await _storage.savePdfFromImages(widget.scanSession.scannedImages, fileName);
+        filePath = await _storage.savePdfFromImages(
+            widget.scanSession.scannedImages, fileName);
       } else {
-        filePath = await _storage.saveImageFromSession(widget.scanSession.scannedImages, fileName);
+        filePath = await _storage.saveImageFromSession(
+            widget.scanSession.scannedImages, fileName);
       }
 
-      final thumbnailPath = await _storage.createThumbnail(widget.scanSession.scannedImages.first);
+      final thumbnailPath = await _storage
+          .createThumbnail(widget.scanSession.scannedImages.first);
 
       final document = ScannedDocument(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -94,7 +97,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -146,7 +149,8 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.7),
                         borderRadius: BorderRadius.circular(12),
@@ -199,7 +203,8 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],
@@ -236,7 +241,9 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
                 type: DocumentType.photo,
                 icon: Icons.image_outlined,
                 label: 'Photo',
-                subtitle: widget.scanSession.count == 1 ? 'Single image' : 'PDF (multiple pages)',
+                subtitle: widget.scanSession.count == 1
+                    ? 'Single image'
+                    : 'PDF (multiple pages)',
               ),
             ),
           ],
@@ -253,7 +260,7 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
     required String subtitle,
   }) {
     final isSelected = _selectedType == type;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _selectedType = type),
       child: Container(
@@ -274,14 +281,18 @@ class _SaveDocumentPageState extends State<SaveDocumentPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface,
               size: 32,
             ),
             const SizedBox(height: 8),
             Text(
               label,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
